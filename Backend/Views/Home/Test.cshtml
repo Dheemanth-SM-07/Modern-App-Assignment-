@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Button Test";
+}
+
+<h1>Simple Button Test</h1>
+
+<button id="test-btn" class="btn btn-primary">Click Me</button>
+<div id="test-result"></div>
+
+@section Scripts {
+    <script>
+        console.log('Test page scripts loading...');
+        
+        document.getElementById('test-btn').addEventListener('click', function() {
+            console.log('Button clicked!');
+            document.getElementById('test-result').innerHTML = '<p class="alert alert-success mt-3">Button works!</p>';
+        });
+        
+        console.log('Test page scripts loaded!');
+    </script>
+}
