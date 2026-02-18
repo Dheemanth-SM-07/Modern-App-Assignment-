@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Backend.Data;
+using Backend.Models;
 using Backend.Hubs;
 using Backend.HealthChecks;
 using HealthChecks.UI.Client;
@@ -13,9 +14,13 @@ builder.Services.AddControllersWithViews()
 
 builder.Services.AddRazorPages();
 
-// Add DbContext
+// Add DbContext - Using In-Memory Database for demonstration
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseInMemoryDatabase("ModernAppDB"));
+    
+// Alternative: SQL Server (uncomment when SQL Server is available)
+// builder.Services.AddDbContext<ApplicationDbContext>(options =>
+//     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add SignalR for real-time communication
 builder.Services.AddSignalR();
@@ -58,6 +63,63 @@ builder.Services.AddResponseCompression(options =>
 });
 
 var app = builder.Build();
+
+// Seed the in-memory database with sample data
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    
+    // Ensure database is created
+    context.Database.EnsureCreated();
+    
+    // Add sample products if none exist
+    if (!context.Products.Any())
+    {
+        context.Products.AddRange(
+            new Product
+            {
+                Name = "Laptop",
+                Description = "High-performance laptop with 16GB RAM",
+                Price = 1299.99m,
+                InStock = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Wireless Mouse",
+                Description = "Ergonomic wireless mouse with USB receiver",
+                Price = 29.99m,
+                InStock = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Mechanical Keyboard",
+                Description = "RGB mechanical keyboard with blue switches",
+                Price = 89.99m,
+                InStock = false,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "USB-C Hub",
+                Description = "7-in-1 USB-C hub with HDMI and SD card reader",
+                Price = 49.99m,
+                InStock = true,
+                CreatedAt = DateTime.Now
+            },
+            new Product
+            {
+                Name = "Webcam HD",
+                Description = "1080p HD webcam with built-in microphone",
+                Price = 79.99m,
+                InStock = true,
+                CreatedAt = DateTime.Now
+            }
+        );
+        context.SaveChanges();
+    }
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
